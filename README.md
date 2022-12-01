@@ -9,7 +9,7 @@ s kernelem 5.8.0-48-generic. V obou případech s Python 3.8.1. Je vhodné mít 
 
 ## Instalace prerekvizit
 ### Dodatečné soubory
-Pro správné fungování některých skriptů je potřeba stáhnout ZIP archiv [zde](https://drive.google.com/file/d/1aFUuOcKDjAd4NIKJvnr4LOoxtMXGhz9n/view?usp=sharing) a extrahovat jeho obsah do kořenového adresáře projektu (např. pomocí 7zip).
+Finální modely jsou k dispozici v ZIP archivu [zde](https://drive.google.com/file/d/1tXZuauUrxIDNdb9E1l0TjnnHtXsPCHTw/view?usp=sharing). Archiv také obsahuje konfigurace tokenizeru a konfigurace ostatních modelů.
 
 ### Crawler
 Všechny balíčky lze nainstalovat příkazem
@@ -36,35 +36,17 @@ Stažené stránky jsou uloženy ve složce <code>pages</code>, ve které každ�
 
 Běh crawleru se zaznamenává do souboru <code>log.txt</code>.
 
-## Spuštění neuronové sítě
+## Neuronové sítě
 ### Relevantní složky
 Pro neuronové sítě jsou relevantní následující složky:
 * <code>model_configurations</code> - konfigurace neuronových sítí,
 * <code>neural_net</code> - zdrojové kódy pro předzpracování textů, neuronové sítě a validaci modelů,
-* <code>raw_datasets</code> - obsahuje crawlerem shromážděné relevantní a nerelevantní stránky, použité v práci jako dataset,
-* <code>split_datasets</code>  - obsahuje předzpracovaný dataset rozdělený na trénovací a testovací části,
-* <code>validation_datasets</code> - obsahuje vývojové a kontrolní datasety s jejich anotacemi,
-* <code>final_models</code> - obsahuje finální evaluované modely.
-
+* <code>final_models</code> - obsahuje finální evaluované TensorFlow modely.
+	
 ### Vytvoření datasetu
-Pro vytvoření datasetu a jeho rozdělení na trénovací a testovací části slouží skript <code>create_dataset.py</code>.  Trénovací část se uloží do složky <code>train_created</code> a testovací část do složky <code>test_created</code>. Je vytvořen soubor <code>preprocessing-config</code>, který obsahuje data potřebná pro předzpracování.
+Pro vytvoření datasetu a jeho rozdělení na trénovací a testovací části slouží skript <code>create_dataset.py</code>. Trénovací část se uloží do složky <code>train_created</code> a testovací část do složky <code>test_created</code>. Je vytvořen soubor <code>preprocessing-config</code>, který obsahuje data potřebná pro předzpracování.
+Skript očekává existenci složky <code>raw_datasets</code>, která obsahuje složku <code>pages</code> (výstup crawleru) a <code>irrelevant</code> (stránky, které nejsou ani podmínky, ani informace o ochraně o. ú.).
 
-### Trénování modelů
-Skripty <code>train_saved_model.py</code> a <code>train_created_model.py</code> slouží pro trénování modelů. První z nich trénuje modely použité v práci nad daty použitými v práci. Druhý skript modely trénuje nad daty, které byly vytvořeny pomocí skriptu <code>create_dataset.py</code> (viz. výše). Skripty jinak fungují  
-obdobně.
-
-Skripty vyžadují jeden argument, a to konfiguraci modelu. Konfigurace modelů jsou ve složce <code>model_configurations</code>, která obsahuje následující složky:
-* <code>zakladni_model</code> - konfigurace základního modelu,
-* <code>dropout_model</code> - konfigurace modelu s dropoutem,
-* <code>zmensene_modely</code> - konfigurace zmenšených modelů.
-
-Složky obsahují konfigurace modelů, z jejichž názvu je zjevné, o jaký model z práce se jedná. Skripty jako argument vyžadují cestu ke konfiguraci ve tvaru <code>složka modelu/konfigurace</code>, tedy například
-
-<code>zakladni_modely/s-klicovymi-slovy-8-epoch</code>
-
-Protože skripty využívají relativní cesty, je nutné je nepřesouvat. Skript pak načte konfiguraci modelu a spustí trénování a validaci modelu. Průběh trénování lze sledovat v konzoli. Výsledky validace jsou pak také vypsány do konzole. Validace se provádí nad všemi ověřovacími datasety; jako výsledek je do konzole pro každý dataset vypsána matice záměn a spočtené metriky.
-
-Skript <code>train_created_model.py</code> je konfigurován tak, aby automaticky pracoval s daty, vytvořenými pomocí skriptu <code>create_dataset.py</code> - jediné, co očekává, je existence složek <code>train_created</code> a <code>test_created</code> s daty v nich. Skript <code>train_created_model.py</code> používá konfigurace ze složky <code>model_configurations</code>.
-
-Složka <code>final_models</code> obsahuje finální modely (celkem pět modelů) - nejlepší testovaný model je pojmenován <code>model-best</code>. K validaci výsledků těchto modelů slouží skript <code>validate_final_model.py</code>. Ten vyžaduje jeden argument, a to název modelu ze složky <code>final_models</code>. Skript pak provede validaci vybraného modelu nad všemi datasety a pro kontrolní dataset navíc provede validaci v kombinaci s klasifikací pomocí klíčových slov.
+### Modely
+Složka <code>final_models</code> obsahuje finální TensorFlow modely - nejlepší testovaný model je pojmenován <code>model-best</code>. Tyto modely lze použít pro filtrování stránek stažených crawlerem.
 
